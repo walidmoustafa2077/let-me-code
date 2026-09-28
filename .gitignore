@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Vendor scrap yard (102 conflicting skills) - never enter history
+vendor/
+
+# Delegation engine runtime artifacts
+.delegation/logs/
+.delegation/runs/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Local env / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
