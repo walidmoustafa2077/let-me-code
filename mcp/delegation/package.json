@@ -1,0 +1,14 @@
+{
+  "name": "@let-me-code/delegation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "zod": "^3.23.8"
+  }
+}

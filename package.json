@@ -1,0 +1,10 @@
+{
+  "name": "let-me-code",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm --prefix mcp/delegation test",
+    "serve": "opencode serve --port 4096",
+    "smoke": "node scripts/smoke.mjs"
+  }
+}
