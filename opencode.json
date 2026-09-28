@@ -6,7 +6,7 @@
       "command": ["node", "mcp/delegation/src/index.ts"],
       "cwd": ".",
       "enabled": true,
-      "timeout": 15000
+      "timeout": 1200000
     }
   },
   "agent": {
@@ -18,7 +18,7 @@
       "description": "The factory manager. Sole entry point; sole writer of BOARD.md; dispatches all other agents.",
       "permission": {
         "edit": { "BOARD.md": "allow", "INTENT.md": "allow", "QUESTIONS_FOR_CLIENT.md": "allow", "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git checkout*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "ask" },
+        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow", "git branch*": "allow", "git rev-parse*": "allow", "git ls-files*": "allow", "git checkout*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "Invoke-RestMethod*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "deny" },
         "task": { "*": "deny" },
         "delegation_*": "allow",
         "skill": { "core-router": "allow", "intent-extractor": "allow", "state-manager": "allow", "configure-delegation": "allow", "*": "deny" }
@@ -42,7 +42,7 @@
       "description": "Implements tickets in thin verifiable slices; delegates boilerplate to general; commits atomically.",
       "permission": {
         "edit": { "src/**": "allow", "tests/**": "allow", "*": "deny" },
-        "bash": { "git add*": "allow", "git commit*": "allow", "git status*": "allow", "git diff*": "allow", "npm test*": "allow", "npm run*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "ask" },
+        "bash": { "git add*": "allow", "git commit*": "allow", "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git branch*": "allow", "git rev-parse*": "allow", "git show*": "allow", "git ls-files*": "allow", "npm test*": "allow", "npm run*": "allow", "npm --prefix*": "allow", "node mcp/delegation*": "allow", "node --test*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "deny" },
         "task": { "*": "deny" },
         "webfetch": "allow",
         "delegation_*": "allow",
