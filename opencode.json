@@ -1,0 +1,65 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "delegation": {
+      "type": "local",
+      "command": ["node", "mcp/delegation/src/index.ts"],
+      "cwd": ".",
+      "enabled": true,
+      "timeout": 15000
+    }
+  },
+  "agent": {
+    "general": {
+      "model": "ollama/deepseek-v4.1-flash:cloud"
+    },
+    "orchestrator": {
+      "mode": "primary",
+      "description": "The factory manager. Sole entry point; sole writer of BOARD.md; dispatches all other agents.",
+      "permission": {
+        "edit": { "BOARD.md": "allow", "INTENT.md": "allow", "QUESTIONS_FOR_CLIENT.md": "allow", "*": "deny" },
+        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git checkout*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "ask" },
+        "task": { "*": "deny" },
+        "delegation_*": "allow",
+        "skill": { "core-router": "allow", "intent-extractor": "allow", "state-manager": "allow", "configure-delegation": "allow", "*": "deny" }
+      }
+    },
+    "architect": {
+      "mode": "subagent",
+      "description": "Turns INTENT into a spec, CONSTRAINTS.md, and gated tickets. Writes no production code.",
+      "permission": {
+        "edit": { "docs/specs/**": "allow", "CONSTRAINTS.md": "allow", "tickets/**": "allow", "*": "deny" },
+        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "task": { "*": "deny" },
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "delegation_ticket_write": "allow",
+        "skill": { "spec-creator": "allow", "task-breakdown": "allow", "*": "deny" }
+      }
+    },
+    "senior-dev": {
+      "mode": "subagent",
+      "description": "Implements tickets in thin verifiable slices; delegates boilerplate to general; commits atomically.",
+      "permission": {
+        "edit": { "src/**": "allow", "tests/**": "allow", "*": "deny" },
+        "bash": { "git add*": "allow", "git commit*": "allow", "git status*": "allow", "git diff*": "allow", "npm test*": "allow", "npm run*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "ask" },
+        "task": { "*": "deny" },
+        "webfetch": "allow",
+        "delegation_*": "allow",
+        "skill": { "core-implementer": "allow", "delegate-task": "allow", "*": "deny" }
+      }
+    },
+    "qa-engineer": {
+      "mode": "subagent",
+      "description": "Combined quality gate: reviews the diff against the spec, writes and runs tests, scans for security issues.",
+      "permission": {
+        "edit": { "tests/**": "allow", "*": "deny" },
+        "bash": { "npm test*": "allow", "node --test*": "allow", "git add*": "allow", "git commit*": "allow", "git status*": "allow", "git diff*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "task": { "*": "deny" },
+        "webfetch": "deny",
+        "delegation_*": "deny",
+        "skill": { "test-driven-development": "allow", "security-hardening": "allow", "code-review-and-quality": "allow", "*": "deny" }
+      }
+    }
+  }
+}
