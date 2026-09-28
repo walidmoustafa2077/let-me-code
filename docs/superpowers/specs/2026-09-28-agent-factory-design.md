@@ -1,7 +1,7 @@
 # Design — "Agent Factory" on opencode (v1 Walking Skeleton)
 
 - **Date:** 2026-09-28
-- **Status:** Approved (pending spec review)
+- **Status:** Approved · all build-time open items resolved empirically (see §11)
 - **Repo:** `C:\Dev\let-me-code`
 - **Runtime:** opencode 1.18.30 (primary harness) · Node v24.17.0 (MCP runtime) · git 2.54.0.windows.1 · win32
 
@@ -306,10 +306,27 @@ Success requires **all** of:
 
 No human code-writes during the run — only approvals.
 
-## 11. Open Items to Confirm at Build Time (do not guess)
+## 11. Open Items — RESOLVED at Build Time (empirically verified 2026-09-28, opencode 1.18.30)
 
-1. Exact `opencode.json` syntax to override the **built-in `general`** agent's model/tools. Fallback:
-   custom `junior-dev` agent.
-2. Exact abort endpoint (`POST /session/:id/abort`?) for `engine_abort`. Fallback: kill process tree.
-3. Whether `POST /session/:id/message` returns the full parts (including the HANDOFF text) reliably for
-   parsing, vs. needing `GET /session/:id/message` afterward.
+1. **Built-in `general` override — WORKS.** Setting `agent.general.model` in `opencode.json` overrides the
+   built-in agent's model (verified: serving with a config that sets `general.model` returns `general` in
+   `GET /agent` carrying that model, `providerID: "ollama"`). A custom `junior-dev` agent registered in the
+   same config also appears in the roster. **Decision: override `general`; no `junior-dev` needed.** Keep the
+   10-line `junior-dev.md` fallback documented but unused unless an override regresses.
+2. **Abort endpoint — CONFIRMED:** `POST /session/{sessionID}/abort`. Fallback remains process-tree kill.
+3. **Message response shape — CONFIRMED:** `POST /session/{sessionID}/message` returns HTTP 200 with
+   `{ info, parts }`; `parts` contains a `text` part carrying the HANDOFF block verbatim (parsed
+   successfully). No follow-up `GET` required. Other observed part types: `step-start`, `reasoning`,
+   `step-finish`. Session id field is `id`.
+
+### Additional verified facts (feed the plan, §5.1)
+
+- **No build step:** Node 24 executes `.ts` directly (type stripping; run with `node file.ts`) and
+  `node --test` runs TS test files. Keep relative imports explicit (`./dep.ts`).
+- **Live endpoint families (162 paths in `/doc`):** primary surface used here is `GET /global/health`,
+  `GET /agent`, `POST /session`, `POST /session/{id}/message`, `POST /session/{id}/abort`.
+  (`/api/*` duplicates exist; prefer the non-`/api` paths in §5.1.)
+- **Built-in subagents present in the default roster:** `general`, `explore`, `plan`, `build`,
+  `compaction`, `summary`, `title`.
+- **Message call is long-blocking** (~32 s for a trivial reply). The MCP HTTP client must set a generous
+  timeout and treat `timeout_ms` as authoritative.
