@@ -6,6 +6,7 @@ import { initBoard, moveTicket, readBoard, type Column } from "./board.ts";
 import { loadConfig, repoRoot } from "./config.ts";
 import { OpenCodeClient } from "./http.ts";
 import { delegateTask } from "./spawn.ts";
+import { maybePrintVersion, readPackageVersion } from "./version.ts";
 
 const TOOL_NAMES = [
   "delegate_task", "engine_status", "engine_abort",
@@ -27,7 +28,7 @@ function fail(text: string) {
 const ticketsDir = (root: string) => `${root}/tickets`;
 
 export function createServer(root: string = repoRoot()): McpServer {
-  const server = new McpServer({ name: "delegation", version: "0.1.0" });
+  const server = new McpServer({ name: "delegation", version: readPackageVersion() });
   const cfg = loadConfig(root);
   const client = new OpenCodeClient(cfg);
 
@@ -168,6 +169,9 @@ async function main() {
 }
 
 if (process.argv[1] && process.argv[1].replace(/\\/g, "/").endsWith("mcp/delegation/src/index.ts")) {
+  if (maybePrintVersion()) {
+    process.exit(0);
+  }
   main().catch((e) => {
     console.error(e);
     process.exit(1);
