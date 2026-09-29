@@ -1,0 +1,24 @@
+Operate fully autonomously. Do NOT ask questions; record any assumption you make in INTENT.md and
+proceed. Do not use `ask`-gated tools; if something is not permitted, adapt.
+
+Feature: add a `--json` output mode flag to the delegation MCP's `engine_status` tool. With no flag,
+behavior is unchanged. With `--json`, `engine_status` prints a single JSON object with the fields
+{server_up, version, agent_roster, serverUrl, allowedAgents} and nothing else. This is a change to the
+`engine_status` tool handler in `mcp/delegation/src/index.ts` only.
+
+Run the full v1.1 factory flow:
+1. INTAKE: write INTENT.md.
+2. BLUEPRINT: delegate to architect for a spec + CONSTRAINTS.md + at least two tickets, where the
+   second ticket depends_on the first.
+3. CHALLENGE: delegate to challenger; if it raises blocking findings, have the architect revise ONCE;
+   then delegate to git-agent to commit the planning artifacts.
+4. POPULATE: write BOARD.md (you are the sole writer).
+5. EXECUTE: delegate the first ticket to senior-dev. It MUST leave the working tree dirty and commit
+   nothing.
+6. QUALITY: delegate to qa-engineer (review the uncommitted diff, write and run tests) AND to
+   minimalism-enforcer. Both must pass before any commit. If either fails, nothing is committed, the
+   ticket goes Blocked, and senior-dev retries with the findings (max 2).
+7. LAND: delegate to git-agent to commit `feat(TICKET-N)` then `test(TICKET-N)`, and move the ticket
+   to Done.
+8. Repeat for the second ticket (proves depends_on gating), then CLOSE by delegating to tech-writer.
+Finish with a summary of every commit, every child session, and the final BOARD.md state.
