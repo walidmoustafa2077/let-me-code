@@ -57,16 +57,17 @@ export function createServer(root: string = repoRoot()): McpServer {
 
   server.registerTool(
     "engine_status",
-    { description: "Report engine liveness, version, agent roster, and config.", inputSchema: {} },
-    async () => {
+    { description: "Report engine liveness, version, agent roster, and config.", inputSchema: { json: z.boolean().optional() } },
+    async (args) => {
       try {
         const health = await client.health();
         const agents = await client.agents();
-        return ok(JSON.stringify({
+        const payload = {
           server_up: health.healthy, version: health.version,
           agent_roster: agents.map((a) => a.name), serverUrl: cfg.serverUrl,
           allowedAgents: cfg.allowedAgents,
-        }, null, 2));
+        };
+        return ok(args.json ? JSON.stringify(payload) : JSON.stringify(payload, null, 2));
       } catch (e) {
         return ok(JSON.stringify({ server_up: false, error: (e as Error).message, serverUrl: cfg.serverUrl }, null, 2));
       }
