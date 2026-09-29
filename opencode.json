@@ -11,15 +11,22 @@
   },
   "agent": {
     "general": {
-      "model": "ollama/deepseek-v4.1-flash:cloud"
+      "model": "ollama/deepseek-v4.1-flash:cloud",
+      "permission": { "ctx_*": "deny" }
     },
     "orchestrator": {
       "mode": "primary",
       "description": "The factory manager. Sole entry point; sole writer of BOARD.md; dispatches all other agents.",
       "permission": {
         "edit": { "BOARD.md": "allow", "INTENT.md": "allow", "QUESTIONS_FOR_CLIENT.md": "allow", "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow", "git branch*": "allow", "git rev-parse*": "allow", "git ls-files*": "allow", "git checkout*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "Invoke-RestMethod*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "delegation_*": "allow",
         "skill": { "core-router": "allow", "intent-extractor": "allow", "state-manager": "allow", "configure-delegation": "allow", "context-engineering": "allow", "agent-dispatcher": "allow", "verification": "allow", "meta-debugger": "allow", "*": "deny" }
       }
@@ -29,8 +36,16 @@
       "description": "Turns INTENT into a spec, CONSTRAINTS.md, and gated tickets. Writes no production code.",
       "permission": {
         "edit": { "docs/specs/**": "allow", "CONSTRAINTS.md": "allow", "tickets/**": "allow", "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "deny",
         "delegation_ticket_write": "allow",
@@ -42,8 +57,15 @@
       "description": "Implements tickets in thin verifiable slices; delegates boilerplate to general; leaves the tree dirty for review (never commits).",
       "permission": {
         "edit": { "src/**": "allow", "tests/**": "allow", "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow", "git branch*": "allow", "git rev-parse*": "allow", "git ls-files*": "allow", "npm test*": "allow", "npm run*": "allow", "npm --prefix*": "allow", "node mcp/delegation*": "allow", "node --test*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "git add*": "deny", "git commit*": "deny", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "allow",
         "skill": { "core-implementer": "allow", "delegate-task": "allow", "source-grounding": "allow", "incremental-implementation": "allow", "apply-design": "allow", "debugging-and-error-recovery": "allow", "performance": "allow", "ui-engineer": "allow", "refactoring-and-simplification": "allow", "*": "deny" }
@@ -54,8 +76,15 @@
       "description": "Combined quality gate: reviews the uncommitted diff against the spec, writes and runs tests, scans for security issues. Never commits.",
       "permission": {
         "edit": { "tests/**": "allow", "*": "deny" },
-        "bash": { "npm test*": "allow", "node --test*": "allow", "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git add*": "deny", "git commit*": "deny", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "deny",
         "delegation_*": "deny",
         "skill": { "test-driven-development": "allow", "security-hardening": "allow", "code-review-and-quality": "allow", "root-cause-debugging": "allow", "review-protocol": "allow", "verification": "allow", "*": "deny" }
@@ -66,8 +95,14 @@
       "description": "The only git writer. Stages and commits verified work only; never commits unverified changes; never pushes.",
       "permission": {
         "edit": { "*": "deny" },
-        "bash": { "git add*": "allow", "git commit*": "allow", "git status*": "allow", "git diff*": "allow", "git log*": "allow", "git show*": "allow", "git branch*": "allow", "git rev-parse*": "allow", "git ls-files*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "rm -rf*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "deny",
         "delegation_*": "deny",
         "skill": { "commit-conventions": "allow", "*": "deny" }
@@ -78,8 +113,16 @@
       "description": "Adversarial plan reviewer. Stress-tests the spec, constraints, and tickets before any code is written.",
       "permission": {
         "edit": { "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "deny",
         "skill": { "doubt-driven-review": "allow", "*": "deny" }
@@ -90,8 +133,16 @@
       "description": "Auditor that flags over-engineering and demands the simplest stdlib-first solution.",
       "permission": {
         "edit": { "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "deny",
         "delegation_*": "deny",
         "skill": { "minimalism-enforcer": "allow", "*": "deny" }
@@ -102,8 +153,16 @@
       "description": "Documentation and retrospective writer. Produces docs/ADRs and improves the factory after a feature lands.",
       "permission": {
         "edit": { "docs/**": "allow", "README.md": "allow", "CONSTRAINTS.md": "allow", "*": "deny" },
-        "bash": { "git status*": "allow", "git diff*": "allow", "git log*": "allow", "Get-ChildItem*": "allow", "Test-Path*": "allow", "git push*": "deny", "git reset*--hard*": "deny", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
         "task": { "*": "deny" },
+        "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "deny",
         "skill": { "system-documenter": "allow", "session-retro": "allow", "*": "deny" }
