@@ -5,13 +5,14 @@ import { z } from "zod";
 import { initBoard, moveTicket, readBoard, type Column } from "./board.ts";
 import { loadConfig, repoRoot } from "./config.ts";
 import { OpenCodeClient } from "./http.ts";
+import { readMetrics } from "./metrics.ts";
 import { haltAndRevert } from "./revert.ts";
 import { delegateParallel, delegateTask } from "./spawn.ts";
 import { maybePrintVersion, readPackageVersion } from "./version.ts";
 
 const TOOL_NAMES = [
   "delegate_task", "delegate_parallel", "engine_status", "engine_abort",
-  "engine_halt_and_revert",
+  "engine_halt_and_revert", "engine_metrics",
   "board_read", "board_update", "ticket_write", "ticket_read",
 ] as const;
 
@@ -124,6 +125,25 @@ export function createServer(root: string = repoRoot()): McpServer {
         return ok(JSON.stringify(res, null, 2));
       } catch (e) {
         return fail(`engine_halt_and_revert failed: ${(e as Error).message}`);
+      }
+    },
+  );
+
+  server.registerTool(
+    "engine_metrics",
+    {
+      description: "Aggregate per-agent run metrics (outcomes, durations, files changed, recent failures) from .delegation/logs.",
+      inputSchema: {
+        agent: z.string().optional(),
+        limit: z.number().int().positive().optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const summary = await readMetrics(root, args);
+        return ok(JSON.stringify(summary, null, 2));
+      } catch (e) {
+        return fail(`engine_metrics failed: ${(e as Error).message}`);
       }
     },
   );

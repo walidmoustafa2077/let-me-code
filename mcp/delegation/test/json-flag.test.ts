@@ -136,15 +136,15 @@ test("cross-mode keys deep-equal (no key drift) and values identical", async () 
 });
 
 // 6. Schema guard via listTools().
-test("schema guard: only engine_status has optional boolean json; nine tools", async () => {
+test("schema guard: only engine_status has optional boolean json; ten tools", async () => {
   await withEngine({}, async ({ client }) => {
     const { tools } = await client.listTools();
-    assert.equal(tools.length, 9, "exactly nine tools must be registered");
+    assert.equal(tools.length, 10, "exactly ten tools must be registered");
     assert.deepEqual(
       tools.map((t) => t.name).sort(),
       [
         "board_read", "board_update", "delegate_parallel", "delegate_task", "engine_abort",
-        "engine_halt_and_revert", "engine_status", "ticket_read", "ticket_write",
+        "engine_halt_and_revert", "engine_metrics", "engine_status", "ticket_read", "ticket_write",
       ],
     );
     const es = tools.find((t) => t.name === "engine_status");
@@ -198,11 +198,11 @@ test("version-less degraded: version omitted identically in both modes", async (
 });
 
 // 9. TOOL_NAMES contract intact (regression).
-test("listToolNames() still returns exactly the nine v1.2 tools in order", async () => {
+test("listToolNames() still returns exactly the ten v1.3 tools in order", async () => {
   const { listToolNames } = await import("../src/index.ts");
   assert.deepEqual(listToolNames(), [
     "delegate_task", "delegate_parallel", "engine_status", "engine_abort",
-    "engine_halt_and_revert",
+    "engine_halt_and_revert", "engine_metrics",
     "board_read", "board_update", "ticket_write", "ticket_read",
   ]);
 });

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { createServer as createHttpServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,12 +9,13 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer, listToolNames } from "../src/index.ts";
 
-const NINE_TOOLS = [
+const TEN_TOOLS = [
   "delegate_task",
   "delegate_parallel",
   "engine_status",
   "engine_abort",
   "engine_halt_and_revert",
+  "engine_metrics",
   "board_read",
   "board_update",
   "ticket_write",
@@ -47,13 +48,13 @@ async function connect(dir: string): Promise<Client> {
   return client;
 }
 
-test("the server registers exactly the nine v1.2 tools in order", () => {
-  assert.deepEqual(listToolNames(), NINE_TOOLS);
+test("the server registers exactly the ten v1.3 tools in order", () => {
+  assert.deepEqual(listToolNames(), TEN_TOOLS);
 });
 
-test("all nine tools are registered through the MCP client", async () => {
+test("all ten tools are registered through the MCP client", async () => {
   const { tools } = await (await connect(repo())).listTools();
-  assert.deepEqual(tools.map((t) => t.name).sort(), [...NINE_TOOLS].sort());
+  assert.deepEqual(tools.map((t) => t.name).sort(), [...TEN_TOOLS].sort());
 });
 
 test("ticket_write then ticket_read round-trips through the MCP client", async () => {
@@ -127,6 +128,57 @@ test("delegate_parallel round-trips through the MCP client", { timeout: 20000 },
   } finally {
     engine.close();
   }
+});
+
+test("engine_metrics round-trips through the MCP client", async () => {
+  const dir = repo();
+  const logsDir = join(dir, ".delegation", "logs");
+  mkdirSync(logsDir, { recursive: true });
+  const entry = (over: Record<string, unknown>) => JSON.stringify({
+    sessionId: "ses_1",
+    agent: "general",
+    payload: { status: "done", summary: "ok", duration_ms: 100, changed_files: ["a.ts"] },
+    timestamp: "2026-01-01T00:00:00.000Z",
+    ...over,
+  });
+  writeFileSync(
+    join(logsDir, "2026-01-01T00-00-00-000Z.jsonl"),
+    [
+      entry({}),
+      entry({ sessionId: "ses_2", payload: { status: "blocked", summary: "stuck", duration_ms: 300, changed_files: [] } }),
+      entry({ sessionId: "ses_3", agent: "architect", payload: { status: "done", summary: "ok", duration_ms: 50, changed_files: ["b.ts", "c.ts"] } }),
+    ].join("\n") + "\n",
+  );
+
+  const client = await connect(dir);
+  const r = await client.callTool({ name: "engine_metrics", arguments: {} });
+  const parsed = JSON.parse((r.content as Array<{ text: string }>)[0].text) as {
+    total_sessions: number;
+    agents: Record<string, { total_runs: number; outcomes: { done: number; blocked: number }; total_files_changed: number }>;
+    recent_failures: Array<{ session_id: string; agent: string }>;
+  };
+  assert.equal(parsed.total_sessions, 3);
+  assert.equal(parsed.agents.general.total_runs, 2);
+  assert.equal(parsed.agents.general.outcomes.done, 1);
+  assert.equal(parsed.agents.general.outcomes.blocked, 1);
+  assert.equal(parsed.agents.architect.total_files_changed, 2);
+  assert.equal(parsed.recent_failures.length, 1);
+  assert.equal(parsed.recent_failures[0].session_id, "ses_2");
+});
+
+test("engine_metrics round-trips through the MCP client with an agent filter", async () => {
+  const dir = repo();
+  const logsDir = join(dir, ".delegation", "logs");
+  mkdirSync(logsDir, { recursive: true });
+  writeFileSync(
+    join(logsDir, "2026-01-01T00-00-00-000Z.jsonl"),
+    JSON.stringify({ sessionId: "ses_1", agent: "general", payload: { status: "done", duration_ms: 100 } }) + "\n",
+  );
+
+  const client = await connect(dir);
+  const r = await client.callTool({ name: "engine_metrics", arguments: { agent: "architect" } });
+  const parsed = JSON.parse((r.content as Array<{ text: string }>)[0].text) as { total_sessions: number };
+  assert.equal(parsed.total_sessions, 0);
 });
 
 test("engine_halt_and_revert round-trips through the MCP client", async () => {
