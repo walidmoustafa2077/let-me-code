@@ -1,9 +1,29 @@
 {
   "name": "let-me-code",
-  "private": true,
+  "version": "0.1.0",
+  "description": "An agent factory for opencode: specialised subagents, skills, and a delegation MCP server, bootstrapped with one command.",
+  "license": "MIT",
   "type": "module",
+  "bin": {
+    "let-me-code": "bin/cli.mjs"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "files": [
+    ".opencode",
+    "mcp",
+    "!mcp/delegation/node_modules",
+    "opencode.json",
+    "DELEGATE_CONFIG.json",
+    "bin",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
-    "test": "npm --prefix mcp/delegation test",
+    "test": "node --test \"test/**/*.test.mjs\" && npm --prefix mcp/delegation test",
+    "cli": "node bin/cli.mjs",
     "serve": "opencode serve --port 4096",
     "smoke": "node scripts/smoke.mjs"
   }
