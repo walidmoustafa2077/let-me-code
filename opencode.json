@@ -68,7 +68,30 @@
         "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "allow",
-        "skill": { "core-implementer": "allow", "delegate-task": "allow", "source-grounding": "allow", "incremental-implementation": "allow", "apply-design": "allow", "debugging-and-error-recovery": "allow", "performance": "allow", "ui-engineer": "allow", "refactoring-and-simplification": "allow", "*": "deny" }
+        "skill": { "core-implementer": "allow", "delegate-task": "allow", "source-grounding": "allow", "incremental-implementation": "allow", "apply-design": "allow", "debugging-and-error-recovery": "allow", "performance": "allow", "ui-engineer": "allow", "refactoring-and-simplification": "allow", "mentorship": "allow", "*": "deny" }
+      }
+    },
+    "junior-dev": {
+      "mode": "subagent",
+      "description": "Leaf implementation worker for scoped, well-scaffolded boilerplate and helpers. Never commits.",
+      "permission": {
+        "edit": { "src/**": "allow", "tests/**": "allow", "*": "deny" },
+        "bash": {
+          "*": "deny",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "npm test*": "allow",
+          "node --test*": "allow",
+          "node mcp/delegation*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": { "*": "deny" },
+        "ctx_*": "deny",
+        "delegation_*": "deny"
       }
     },
     "qa-engineer": {
@@ -125,7 +148,7 @@
         "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "deny",
-        "skill": { "doubt-driven-review": "allow", "*": "deny" }
+        "skill": { "doubt-driven-review": "allow", "guardrail-audit": "allow", "*": "deny" }
       }
     },
     "minimalism-enforcer": {

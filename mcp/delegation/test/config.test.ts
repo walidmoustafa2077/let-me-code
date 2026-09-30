@@ -10,7 +10,7 @@ test("defaultConfig has safe timeouts and the v1 allowlist", () => {
   assert.equal(c.engine, "opencode");
   assert.equal(c.timeouts.healthMs, 5000);
   assert.ok(c.timeouts.messageMs >= 600000);
-  assert.deepEqual(c.allowedAgents.sort(), ["architect", "general", "qa-engineer", "senior-dev"]);
+  assert.deepEqual(c.allowedAgents.sort(), ["architect", "general", "junior-dev", "qa-engineer", "senior-dev"]);
 });
 
 test("loadConfig merges a partial DELEGATE_CONFIG.json over defaults", () => {
