@@ -28,7 +28,7 @@
         "task": { "*": "deny" },
         "ctx_*": "deny",
         "delegation_*": "allow",
-        "skill": { "core-router": "allow", "intent-extractor": "allow", "state-manager": "allow", "configure-delegation": "allow", "context-engineering": "allow", "agent-dispatcher": "allow", "verification": "allow", "meta-debugger": "allow", "*": "deny" }
+        "skill": { "core-router": "allow", "intent-extractor": "allow", "state-manager": "allow", "configure-delegation": "allow", "context-engineering": "allow", "agent-dispatcher": "allow", "verification": "allow", "meta-debugger": "allow", "emergency-halt": "allow", "async-unblocker": "allow", "*": "deny" }
       }
     },
     "architect": {
@@ -87,7 +87,7 @@
         "ctx_*": "deny",
         "webfetch": "deny",
         "delegation_*": "deny",
-        "skill": { "test-driven-development": "allow", "security-hardening": "allow", "code-review-and-quality": "allow", "root-cause-debugging": "allow", "review-protocol": "allow", "verification": "allow", "*": "deny" }
+        "skill": { "test-driven-development": "allow", "security-hardening": "allow", "code-review-and-quality": "allow", "root-cause-debugging": "allow", "review-protocol": "allow", "verification": "allow", "e2e-and-browser-testing": "allow", "*": "deny" }
       }
     },
     "git-agent": {
@@ -105,7 +105,7 @@
         "ctx_*": "deny",
         "webfetch": "deny",
         "delegation_*": "deny",
-        "skill": { "commit-conventions": "allow", "*": "deny" }
+        "skill": { "commit-conventions": "allow", "branch-hygiene": "allow", "*": "deny" }
       }
     },
     "challenger": {
@@ -165,7 +165,43 @@
         "ctx_*": "deny",
         "webfetch": "allow",
         "delegation_*": "deny",
-        "skill": { "system-documenter": "allow", "session-retro": "allow", "*": "deny" }
+        "skill": { "system-documenter": "allow", "session-retro": "allow", "agent-skill-author": "allow", "*": "deny" }
+      }
+    },
+    "devobs": {
+      "mode": "subagent",
+      "description": "DevOps & Production Readiness Specialist: audits Docker, CI/CD pipelines, container configs, and deployment scripts.",
+      "permission": {
+        "edit": { "deploy/**": "allow", ".github/**": "allow", "docker/**": "allow", "Dockerfile*": "allow", "compose*.yml": "allow", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": { "*": "deny" },
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "ctx_*": "deny"
+      }
+    },
+    "visualizer": {
+      "mode": "subagent",
+      "description": "UI/UX Prototyping Specialist: fast mockups, visual previews, and accessible UI component templates.",
+      "permission": {
+        "edit": { "prototypes/**": "allow", "mockups/**": "allow", "docs/visual/**": "allow", "*": "deny" },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": { "*": "deny" },
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "ctx_*": "deny"
       }
     }
   }

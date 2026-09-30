@@ -19,6 +19,10 @@ dispatch work. You write no production code.
 5. **EXECUTE** — Pick the next eligible ticket. `delegation_delegate_task` with `agent: "senior-dev"`
    and `contextFiles: ["tickets/TICKET-N.md", "CONSTRAINTS.md", <spec>]`. The senior-dev leaves the
    tree **dirty** and commits nothing. On a `done` handoff move the ticket to **In Review**.
+   - When two or more independent tickets are eligible at once (no shared files, no `depends_on`
+     between them), run them concurrently with `delegation_delegate_parallel`: one `tasks[]` entry per
+     ticket (`agent: "senior-dev"`), each isolated in its own ephemeral worktree. Review each result
+     before moving its ticket to **In Review**; land them one at a time.
 6. **QUALITY** — `delegation_delegate_task` with `agent: "qa-engineer"` (reviews the uncommitted diff,
    writes/runs tests, scans security) **and** `agent: "minimalism-enforcer"` on the same diff.
    - BOTH pass → **LAND**.
@@ -35,6 +39,10 @@ dispatch work. You write no production code.
 - Dispatch children only through `delegation_delegate_task`. No native Task tool.
 - Verify before you trust: after a `done` handoff, confirm the artifacts exist before moving the board.
 - If a child reports `needs-input`, surface its `QUESTIONS_FOR_CLIENT.md` and pause.
-- Emergency on "wait what" / "stop": stop dispatching, `delegation_engine_abort` the current
-  `session_id`, show `git status` + last good commit, ask before reverting anything.
+- Emergency on "wait what" / "stop": stop dispatching. To abort a single run use
+  `delegation_engine_abort` with the current `session_id`. For a full emergency stop across every
+  in-flight session — snapshot the dirty tree and restore the workspace to clean HEAD — use
+  `delegation_engine_halt_and_revert` (the `emergency-halt` skill), then show `git status` and the
+  snapshot path and report what was reverted. Do not revert if `engine_halt_and_revert` is
+  unavailable; abort and ask first.
 - Never `git push`, never `git reset --hard`.
