@@ -5,11 +5,13 @@ import { z } from "zod";
 import { initBoard, moveTicket, readBoard, type Column } from "./board.ts";
 import { loadConfig, repoRoot } from "./config.ts";
 import { OpenCodeClient } from "./http.ts";
-import { delegateTask } from "./spawn.ts";
+import { haltAndRevert } from "./revert.ts";
+import { delegateParallel, delegateTask } from "./spawn.ts";
 import { maybePrintVersion, readPackageVersion } from "./version.ts";
 
 const TOOL_NAMES = [
-  "delegate_task", "engine_status", "engine_abort",
+  "delegate_task", "delegate_parallel", "engine_status", "engine_abort",
+  "engine_halt_and_revert",
   "board_read", "board_update", "ticket_write", "ticket_read",
 ] as const;
 
@@ -56,6 +58,29 @@ export function createServer(root: string = repoRoot()): McpServer {
   );
 
   server.registerTool(
+    "delegate_parallel",
+    {
+      description: "Spawn multiple child agents concurrently in isolated ephemeral worktrees and return their aggregated HANDOFF and diff stats.",
+      inputSchema: {
+        tasks: z.array(z.object({
+          agent: z.string(),
+          prompt: z.string(),
+          contextFiles: z.array(z.string()).optional(),
+          model: z.string().optional(),
+        })),
+      },
+    },
+    async (args) => {
+      try {
+        const res = await delegateParallel(root, cfg, client, args.tasks);
+        return ok(JSON.stringify(res, null, 2));
+      } catch (e) {
+        return fail(`delegate_parallel failed: ${(e as Error).message}`);
+      }
+    },
+  );
+
+  server.registerTool(
     "engine_status",
     { description: "Report engine liveness, version, agent roster, and config.", inputSchema: { json: z.boolean().optional() } },
     async (args) => {
@@ -83,6 +108,22 @@ export function createServer(root: string = repoRoot()): McpServer {
         return ok(JSON.stringify(r));
       } catch (e) {
         return fail(`engine_abort failed: ${(e as Error).message}`);
+      }
+    },
+  );
+
+  server.registerTool(
+    "engine_halt_and_revert",
+    {
+      description: "Emergency halt: abort all active child sessions, snapshot uncommitted working tree diff to .delegation/snapshots/, and revert to clean HEAD.",
+      inputSchema: { reason: z.string().optional() },
+    },
+    async (args) => {
+      try {
+        const res = await haltAndRevert(root, client, args.reason);
+        return ok(JSON.stringify(res, null, 2));
+      } catch (e) {
+        return fail(`engine_halt_and_revert failed: ${(e as Error).message}`);
       }
     },
   );
