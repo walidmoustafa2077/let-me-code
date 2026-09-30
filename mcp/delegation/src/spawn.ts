@@ -1,9 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import type { DelegateConfig } from "./config.ts";
 import { changedSince, diffStat, statusPorcelain } from "./git.ts";
 import { extractText, parseHandoff, type Handoff } from "./handoff.ts";
 import type { OpenCodeClient } from "./http.ts";
+import { createWorktree, removeWorktree } from "./worktree.ts";
 
 export interface DelegateArgs {
   agent: string;
@@ -99,4 +100,35 @@ export async function delegateTask(
     session_id: sessionId,
     log_path: logPath,
   };
+}
+
+async function delegateInWorktree(
+  repoRoot: string,
+  worktreePath: string,
+  cfg: DelegateConfig,
+  client: OpenCodeClient,
+  task: DelegateArgs,
+): Promise<DelegateResult> {
+  await createWorktree(repoRoot, worktreePath);
+  try {
+    return await delegateTask(worktreePath, cfg, client, task);
+  } finally {
+    await removeWorktree(repoRoot, worktreePath);
+  }
+}
+
+export async function delegateParallel(
+  repoRoot: string,
+  cfg: DelegateConfig,
+  client: OpenCodeClient,
+  tasks: DelegateArgs[],
+): Promise<DelegateResult[]> {
+  const stamp = Date.now();
+  return Promise.all(
+    tasks.map((task, i) => {
+      const suffix = Math.random().toString(36).slice(2, 6);
+      const worktreePath = join(repoRoot, ".worktrees", `par-${stamp}-${i}-${suffix}`);
+      return delegateInWorktree(repoRoot, worktreePath, cfg, client, task);
+    }),
+  );
 }
