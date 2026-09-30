@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defaultConfig } from "../src/config.ts";
 import { OpenCodeClient } from "../src/http.ts";
-import { buildPrompt, delegateTask, writeLog } from "../src/spawn.ts";
+import { buildPrompt, delegateTask, parseModel, writeLog } from "../src/spawn.ts";
 
 function repo(): string {
   const dir = mkdtempSync(join(tmpdir(), "spawn-"));
@@ -86,4 +86,33 @@ test("writeLog nests under .delegation/logs and returns the path", async () => {
   const p = await writeLog(dir, "architect", "ses_1", { hello: "world" });
   assert.match(p, /\.delegation[\\/]logs[\\/]/);
   assert.ok(existsSync(p));
+});
+
+test("parseModel splits provider/model on the first slash", () => {
+  assert.deepEqual(parseModel("gemini-proxy/gemini-3.8-flash"), {
+    providerID: "gemini-proxy",
+    modelID: "gemini-3.8-flash",
+  });
+  assert.deepEqual(parseModel("ollama/deepseek-v4.1-flash:cloud"), {
+    providerID: "ollama",
+    modelID: "deepseek-v4.1-flash:cloud",
+  });
+  assert.equal(parseModel(undefined), undefined);
+  assert.equal(parseModel("no-slash"), undefined);
+});
+
+test("delegateTask posts the model as a providerID/modelID object, not a string", async () => {
+  const dir = repo();
+  const reply = "ok\n### HANDOFF\nstatus: done\nsummary: did it\nnext: review\n";
+  let sent: { model?: unknown } = {};
+  const result = await delegateTask(
+    dir,
+    defaultConfig(),
+    fakeClient(reply, (body) => {
+      sent = JSON.parse(body);
+    }),
+    { agent: "architect", prompt: "spec it", model: "gemini-proxy/gemini-3.8-flash" },
+  );
+  assert.deepEqual(sent.model, { providerID: "gemini-proxy", modelID: "gemini-3.8-flash" });
+  assert.equal(result.session_id, "ses_1");
 });

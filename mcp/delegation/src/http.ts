@@ -10,6 +10,11 @@ export interface MessageResult {
   parts: ChatPart[];
 }
 
+export interface ModelRef {
+  providerID: string;
+  modelID: string;
+}
+
 export function authHeaders(): Record<string, string> {
   const password = process.env.OPENCODE_SERVER_PASSWORD;
   if (!password) return {};
@@ -64,7 +69,7 @@ export class OpenCodeClient {
 
   postMessage(
     id: string,
-    body: { agent: string; model?: string; parts: ChatPart[] },
+    body: { agent: string; model?: ModelRef; parts: ChatPart[] },
   ): Promise<MessageResult> {
     return this.request<MessageResult>(`/session/${id}/message`, {
       method: "POST",

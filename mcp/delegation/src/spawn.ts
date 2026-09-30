@@ -34,6 +34,13 @@ const HANDOFF_INSTRUCTION = [
   "next: <what the orchestrator should do>",
 ].join("\n");
 
+export function parseModel(spec?: string): { providerID: string; modelID: string } | undefined {
+  if (!spec) return undefined;
+  const slash = spec.indexOf("/");
+  if (slash < 1) return undefined;
+  return { providerID: spec.slice(0, slash), modelID: spec.slice(slash + 1) };
+}
+
 export function buildPrompt(prompt: string, contextFiles: string[]): string {
   const ctx = contextFiles.length
     ? `\n\nRead these context files first: ${contextFiles.join(", ")}`
@@ -77,7 +84,7 @@ export async function delegateTask(
   const baseline = await statusPorcelain(root);
   const sessionId = await client.createSession(`job:${args.agent}`);
   const prompt = buildPrompt(args.prompt, args.contextFiles ?? []);
-  const model = args.model ?? cfg.defaultModel;
+  const model = parseModel(args.model ?? cfg.defaultModel);
 
   const result = await client.postMessage(sessionId, {
     agent: args.agent,
