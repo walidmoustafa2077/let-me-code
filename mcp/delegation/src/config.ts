@@ -39,7 +39,19 @@ export function defaultConfig(): DelegateConfig {
     engine: "opencode",
     serverUrl: "http://localhost:4096",
     timeouts: { healthMs: 5000, messageMs: 900000 },
-    allowedAgents: ["architect", "senior-dev", "qa-engineer", "general", "junior-dev"],
+    allowedAgents: [
+      "architect",
+      "senior-dev",
+      "qa-engineer",
+      "general",
+      "challenger",
+      "git-agent",
+      "minimalism-enforcer",
+      "tech-writer",
+      "devobs",
+      "visualizer",
+      "junior-dev",
+    ],
   };
 }
 
