@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { initBoard, moveTicket, readBoard, type Column } from "./board.ts";
-import { loadConfig, repoRoot } from "./config.ts";
+import { loadConfigDetailed, repoRoot } from "./config.ts";
 import { OpenCodeClient } from "./http.ts";
 import { readMetrics } from "./metrics.ts";
 import { haltAndRevert } from "./revert.ts";
@@ -32,7 +32,9 @@ const ticketsDir = (root: string) => `${root}/tickets`;
 
 export function createServer(root: string = repoRoot()): McpServer {
   const server = new McpServer({ name: "delegation", version: readPackageVersion() });
-  const cfg = loadConfig(root);
+  const resolved = loadConfigDetailed(root);
+  root = resolved.projectRoot;
+  const cfg = resolved.config;
   const client = new OpenCodeClient(cfg);
 
   server.registerTool(
