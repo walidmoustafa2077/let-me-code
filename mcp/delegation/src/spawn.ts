@@ -41,7 +41,7 @@ export function buildPrompt(prompt: string, contextFiles: string[]): string {
   return `${prompt}${ctx}${HANDOFF_INSTRUCTION}`;
 }
 
-function assertInside(root: string, target: string): string {
+export function assertInside(root: string, target: string): string {
   const absRoot = resolve(root);
   const abs = resolve(absRoot, target);
   if (abs !== absRoot && !abs.startsWith(absRoot + "\\") && !abs.startsWith(absRoot + "/")) {
