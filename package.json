@@ -1,6 +1,6 @@
 {
   "name": "let-me-code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An agent factory for opencode: specialised subagents, skills, and a delegation MCP server, bootstrapped with one command.",
   "license": "MIT",
   "type": "module",
