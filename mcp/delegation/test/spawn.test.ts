@@ -4,9 +4,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defaultConfig } from "../src/config.ts";
+import { defaultConfig, parseModel } from "../src/config.ts";
 import { OpenCodeClient } from "../src/http.ts";
-import { buildPrompt, delegateTask, parseModel, writeLog } from "../src/spawn.ts";
+import { buildPrompt, delegateTask, writeLog } from "../src/spawn.ts";
 
 function repo(): string {
   const dir = mkdtempSync(join(tmpdir(), "spawn-"));

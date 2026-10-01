@@ -44,7 +44,10 @@ export class OpenCodeClient {
         signal: controller.signal,
         headers: { "content-type": "application/json", ...authHeaders(), ...(init?.headers ?? {}) },
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${path}`);
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status} ${path}${body ? ` ${body.slice(0, 500)}` : ""}`);
+      }
       return (await res.json()) as T;
     } finally {
       clearTimeout(timer);

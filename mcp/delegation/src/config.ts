@@ -7,12 +7,31 @@ export interface Timeouts {
   messageMs: number;
 }
 
+export interface AgentModelConfig {
+  model?: string;
+  fallback?: string;
+  allowCustom?: boolean;
+}
+
 export interface DelegateConfig {
   engine: string;
   serverUrl: string;
   defaultModel?: string;
+  fallbackModel?: string;
+  allowCustomModel?: boolean;
+  agents?: Record<string, AgentModelConfig>;
   timeouts: Timeouts;
   allowedAgents: string[];
+}
+
+export interface ModelRef {
+  providerID: string;
+  modelID: string;
+}
+
+export interface ResolvedModels {
+  candidates: ModelRef[];
+  usedCustom: boolean;
 }
 
 /** Where each layer of the effective config came from, in precedence order. */
@@ -38,6 +57,8 @@ export function defaultConfig(): DelegateConfig {
   return {
     engine: "opencode",
     serverUrl: "http://localhost:4096",
+    allowCustomModel: true,
+    agents: {},
     timeouts: { healthMs: 5000, messageMs: 900000 },
     allowedAgents: [
       "architect",
@@ -53,6 +74,55 @@ export function defaultConfig(): DelegateConfig {
       "junior-dev",
     ],
   };
+}
+
+/** Split `provider/model` on the first slash; undefined when malformed. */
+export function parseModel(spec?: string): ModelRef | undefined {
+  if (!spec) return undefined;
+  const slash = spec.indexOf("/");
+  if (slash < 1) return undefined;
+  return { providerID: spec.slice(0, slash), modelID: spec.slice(slash + 1) };
+}
+
+/**
+ * Resolve the ordered list of models to try for one delegated job.
+ *
+ * A per-call model is honored only when the agent (or the global default)
+ * allows it. Otherwise candidates come from, in order: the agent's model, the
+ * global default, the agent's fallback, the global fallback — de-duplicated.
+ * An empty list means "let opencode's own agent config choose".
+ */
+export function resolveModels(
+  cfg: DelegateConfig,
+  agent: string,
+  perCall?: string,
+): ResolvedModels {
+  if (perCall) {
+    const allowed = cfg.agents?.[agent]?.allowCustom ?? cfg.allowCustomModel ?? true;
+    if (!allowed) {
+      throw new Error(`agent "${agent}" does not allow a custom (per-call) model`);
+    }
+    const parsed = parseModel(perCall);
+    return { candidates: parsed ? [parsed] : [], usedCustom: true };
+  }
+
+  const specs = [
+    cfg.agents?.[agent]?.model,
+    cfg.defaultModel,
+    cfg.agents?.[agent]?.fallback,
+    cfg.fallbackModel,
+  ];
+  const seen = new Set<string>();
+  const candidates: ModelRef[] = [];
+  for (const spec of specs) {
+    const parsed = parseModel(spec);
+    if (!parsed) continue;
+    const key = `${parsed.providerID}/${parsed.modelID}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    candidates.push(parsed);
+  }
+  return { candidates, usedCustom: false };
 }
 
 /**
@@ -112,6 +182,33 @@ export function validateConfig(raw: unknown, path: string): Partial<DelegateConf
   if ("defaultModel" in o && typeof o.defaultModel !== "string") {
     throw new Error(`${path}: "defaultModel" must be a string`);
   }
+  if ("fallbackModel" in o && typeof o.fallbackModel !== "string") {
+    throw new Error(`${path}: "fallbackModel" must be a string`);
+  }
+  if ("allowCustomModel" in o && typeof o.allowCustomModel !== "boolean") {
+    throw new Error(`${path}: "allowCustomModel" must be a boolean`);
+  }
+  if ("agents" in o) {
+    const a = o.agents;
+    if (a === null || typeof a !== "object" || Array.isArray(a)) {
+      throw new Error(`${path}: "agents" must be an object`);
+    }
+    for (const [name, entry] of Object.entries(a as Record<string, unknown>)) {
+      if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
+        throw new Error(`${path}: "agents.${name}" must be an object`);
+      }
+      const e = entry as Record<string, unknown>;
+      if ("model" in e && typeof e.model !== "string") {
+        throw new Error(`${path}: "agents.${name}.model" must be a string`);
+      }
+      if ("fallback" in e && typeof e.fallback !== "string") {
+        throw new Error(`${path}: "agents.${name}.fallback" must be a string`);
+      }
+      if ("allowCustom" in e && typeof e.allowCustom !== "boolean") {
+        throw new Error(`${path}: "agents.${name}.allowCustom" must be a boolean`);
+      }
+    }
+  }
   if ("timeouts" in o) {
     const t = o.timeouts;
     if (t === null || typeof t !== "object" || Array.isArray(t)) {
@@ -139,6 +236,7 @@ function mergeConfig(base: DelegateConfig, over: Partial<DelegateConfig>): Deleg
     ...base,
     ...over,
     timeouts: { ...base.timeouts, ...(over.timeouts ?? {}) },
+    agents: { ...(base.agents ?? {}), ...(over.agents ?? {}) },
     allowedAgents: over.allowedAgents ?? base.allowedAgents,
   };
 }

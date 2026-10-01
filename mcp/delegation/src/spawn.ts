@@ -1,9 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { DelegateConfig } from "./config.ts";
+import { parseModel, resolveModels } from "./config.ts";
 import { changedSince, diffStat, statusPorcelain } from "./git.ts";
 import { extractText, parseHandoff, type Handoff } from "./handoff.ts";
-import type { OpenCodeClient } from "./http.ts";
+import type { MessageResult, OpenCodeClient } from "./http.ts";
 import { createWorktree, removeWorktree } from "./worktree.ts";
 
 export interface DelegateArgs {
@@ -33,13 +34,6 @@ const HANDOFF_INSTRUCTION = [
   "artifacts: <paths created/modified>",
   "next: <what the orchestrator should do>",
 ].join("\n");
-
-export function parseModel(spec?: string): { providerID: string; modelID: string } | undefined {
-  if (!spec) return undefined;
-  const slash = spec.indexOf("/");
-  if (slash < 1) return undefined;
-  return { providerID: spec.slice(0, slash), modelID: spec.slice(slash + 1) };
-}
 
 export function buildPrompt(prompt: string, contextFiles: string[]): string {
   const ctx = contextFiles.length
@@ -71,26 +65,48 @@ export async function writeLog(
   return path;
 }
 
+function isModelError(err: unknown): boolean {
+  return /ProviderModelNotFoundError|Model not found|provider/i.test(String((err as Error)?.message));
+}
+
 export async function delegateTask(
   root: string,
   cfg: DelegateConfig,
   client: OpenCodeClient,
   args: DelegateArgs,
 ): Promise<DelegateResult> {
-  if (!cfg.allowedAgents.includes(args.agent)) {
-    throw new Error(`agent "${args.agent}" is not on the allowlist (${cfg.allowedAgents.join(", ")})`);
+  const agentKeys = Object.keys(cfg.agents ?? {});
+  const allowed = agentKeys.length ? agentKeys : cfg.allowedAgents;
+  if (!allowed.includes(args.agent)) {
+    throw new Error(`agent "${args.agent}" is not on the allowlist (${allowed.join(", ")})`);
   }
 
   const baseline = await statusPorcelain(root);
   const sessionId = await client.createSession(`job:${args.agent}`);
   const prompt = buildPrompt(args.prompt, args.contextFiles ?? []);
-  const model = parseModel(args.model ?? cfg.defaultModel);
+  const { candidates } = resolveModels(cfg, args.agent, args.model);
 
-  const result = await client.postMessage(sessionId, {
-    agent: args.agent,
-    model,
-    parts: [{ type: "text", text: prompt }],
-  });
+  let result!: MessageResult;
+  if (candidates.length === 0) {
+    result = await client.postMessage(sessionId, {
+      agent: args.agent,
+      parts: [{ type: "text", text: prompt }],
+    });
+  } else {
+    for (let i = 0; i < candidates.length; i++) {
+      try {
+        result = await client.postMessage(sessionId, {
+          agent: args.agent,
+          model: candidates[i],
+          parts: [{ type: "text", text: prompt }],
+        });
+        break;
+      } catch (err) {
+        if (i < candidates.length - 1 && isModelError(err)) continue;
+        throw err;
+      }
+    }
+  }
 
   const text = extractText(result.parts);
   const handoff = parseHandoff(text);
