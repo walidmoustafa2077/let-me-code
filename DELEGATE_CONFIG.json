@@ -1,19 +1,45 @@
 {
   "engine": "opencode",
   "serverUrl": "http://localhost:4096",
-  "timeouts": { "healthMs": 5000, "messageMs": 900000 },
+  "timeouts": {
+    "healthMs": 5000,
+    "messageMs": 900000
+  },
   "allowCustomModel": true,
   "agents": {
-    "architect": { "allowCustom": true },
-    "senior-dev": { "allowCustom": true },
-    "qa-engineer": { "allowCustom": true },
-    "general": { "allowCustom": true },
-    "challenger": { "allowCustom": true },
-    "git-agent": { "allowCustom": true },
-    "minimalism-enforcer": { "allowCustom": true },
-    "tech-writer": { "allowCustom": true },
-    "devobs": { "allowCustom": true },
-    "visualizer": { "allowCustom": true },
-    "junior-dev": { "allowCustom": true }
-  }
+    "architect": {
+      "allowCustom": true
+    },
+    "senior-dev": {
+      "allowCustom": true
+    },
+    "qa-engineer": {
+      "allowCustom": true
+    },
+    "general": {
+      "allowCustom": true
+    },
+    "challenger": {
+      "allowCustom": true
+    },
+    "git-agent": {
+      "allowCustom": true
+    },
+    "minimalism-enforcer": {
+      "allowCustom": true
+    },
+    "tech-writer": {
+      "allowCustom": true
+    },
+    "devobs": {
+      "allowCustom": true
+    },
+    "visualizer": {
+      "allowCustom": true
+    },
+    "junior-dev": {
+      "allowCustom": true
+    }
+  },
+  "defaultModel": "gemini-proxy/flash"
 }

@@ -35,7 +35,7 @@ export function createServer(root: string = repoRoot()): McpServer {
   const resolved = loadConfigDetailed(root);
   root = resolved.projectRoot;
   const cfg = resolved.config;
-  const client = new OpenCodeClient(cfg);
+  const client = new OpenCodeClient(cfg, undefined, { root, autoStart: true });
 
   server.registerTool(
     "delegate_task",
@@ -85,19 +85,28 @@ export function createServer(root: string = repoRoot()): McpServer {
 
   server.registerTool(
     "engine_status",
-    { description: "Report engine liveness, version, agent roster, and config.", inputSchema: { json: z.boolean().optional() } },
+    { description: "Report engine liveness, version, agent roster, config, and engine lock state (with auto-start enabled a network failure self-heals on the next dispatch).", inputSchema: { json: z.boolean().optional() } },
     async (args) => {
       try {
         const health = await client.health();
         const agents = await client.agents();
+        const diag = await client.diagnostics();
         const payload = {
           server_up: health.healthy, version: health.version,
-          agent_roster: agents.map((a) => a.name), serverUrl: cfg.serverUrl,
-          allowedAgents: cfg.allowedAgents,
+          agent_roster: agents.map((a) => a.name),
+          serverUrl: cfg.serverUrl, allowedAgents: cfg.allowedAgents,
+          host: diag.host, port: diag.port, port_open: diag.portOpen,
+          engine_lock: diag.lock, lock_alive: diag.lockAlive, auto_start: true,
         };
         return ok(args.json ? JSON.stringify(payload) : JSON.stringify(payload, null, 2));
       } catch (e) {
-        return ok(JSON.stringify({ server_up: false, error: (e as Error).message, serverUrl: cfg.serverUrl }, null, 2));
+        const diag = await client.diagnostics().catch(() => null);
+        return ok(JSON.stringify({
+          server_up: false, error: (e as Error).message, serverUrl: cfg.serverUrl,
+          host: diag?.host, port: diag?.port, port_open: diag?.portOpen ?? false,
+          engine_lock: diag?.lock ?? null, lock_alive: diag?.lockAlive ?? false,
+          auto_start: true,
+        }, null, 2));
       }
     },
   );

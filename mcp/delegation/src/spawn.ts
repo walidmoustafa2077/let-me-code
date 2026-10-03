@@ -65,8 +65,30 @@ export async function writeLog(
   return path;
 }
 
-function isModelError(err: unknown): boolean {
-  return /ProviderModelNotFoundError|Model not found|provider/i.test(String((err as Error)?.message));
+/**
+ * True for provider/model failures that another candidate could plausibly serve:
+ * missing model, rate limits, quota exhaustion, missing keys, 429/502/503/504, overload.
+ * A generic 500 (e.g. "boom") is NOT retryable, so unrelated bugs still surface.
+ */
+export function isRetryableModelError(err: unknown): boolean {
+  const msg = String((err as Error)?.message ?? err);
+  return /ProviderModelNotFoundError|Model not found|ProviderError|ProviderAuthError|rate.?limit|usage limit|quota|too many requests|No API keys|overloaded|temporarily unavailable|isRetryable|\b(429|502|503|504)\b/i.test(
+    msg,
+  );
+}
+
+/** Pull a human-readable provider error out of an opencode `MessageResult.info`. */
+export function extractInfoError(info: unknown): string | null {
+  if (!info || typeof info !== "object") return null;
+  const err = (info as Record<string, unknown>).error;
+  if (!err) return null;
+  if (typeof err === "string") return err;
+  const o = err as Record<string, unknown>;
+  const name = typeof o.name === "string" ? o.name : "Error";
+  const status = o.statusCode ?? o.status;
+  const data = o.data as Record<string, unknown> | undefined;
+  const message = (data?.message ?? o.message ?? "") as string;
+  return `${name}${status ? ` (${status})` : ""}: ${message || JSON.stringify(o)}`;
 }
 
 export async function delegateTask(
@@ -86,32 +108,59 @@ export async function delegateTask(
   const prompt = buildPrompt(args.prompt, args.contextFiles ?? []);
   const { candidates } = resolveModels(cfg, args.agent, args.model);
 
-  let result!: MessageResult;
-  if (candidates.length === 0) {
-    result = await client.postMessage(sessionId, {
-      agent: args.agent,
-      parts: [{ type: "text", text: prompt }],
-    });
-  } else {
-    for (let i = 0; i < candidates.length; i++) {
-      try {
-        result = await client.postMessage(sessionId, {
-          agent: args.agent,
-          model: candidates[i],
-          parts: [{ type: "text", text: prompt }],
-        });
-        break;
-      } catch (err) {
-        if (i < candidates.length - 1 && isModelError(err)) continue;
-        throw err;
+  const parts = [{ type: "text", text: prompt }];
+  const attempts = candidates.length ? candidates : [undefined];
+  const attemptErrors: string[] = [];
+  let result: MessageResult | undefined;
+
+  for (let i = 0; i < attempts.length; i++) {
+    const model = attempts[i];
+    const label = model ? `${model.providerID}/${model.modelID}` : "default";
+    try {
+      const r = await client.postMessage(sessionId, {
+        agent: args.agent,
+        ...(model ? { model } : {}),
+        parts,
+      });
+      result = r;
+      const infoError = extractInfoError(r.info);
+      if (infoError) attemptErrors.push(`${label}: ${infoError}`);
+      // opencode can return HTTP 200 with a provider error in info; fall back on those too.
+      if (infoError && isRetryableModelError(infoError) && i < attempts.length - 1) continue;
+      break;
+    } catch (err) {
+      attemptErrors.push(`${label}: ${(err as Error).message}`);
+      if (i < attempts.length - 1 && isRetryableModelError(err)) continue;
+      if (attemptErrors.length > 1) {
+        throw new Error(`all model candidates failed: ${attemptErrors.join(" | ")}`);
       }
+      throw err;
     }
+  }
+
+  if (!result) {
+    throw new Error(`no model candidates available (${attemptErrors.join(" | ") || "none configured"})`);
+  }
+
+  const changed = await changedSince(root, baseline);
+  const stat = await diffStat(root);
+  const infoError = extractInfoError(result.info);
+
+  if (infoError) {
+    const logPath = await writeLog(root, args.agent, sessionId, { args, baseline, result, infoError });
+    return {
+      status: "blocked",
+      summary: `Provider/session error: ${infoError}`,
+      handoff: null,
+      changed_files: changed,
+      diff_stat: stat,
+      session_id: sessionId,
+      log_path: logPath,
+    };
   }
 
   const text = extractText(result.parts);
   const handoff = parseHandoff(text);
-  const changed = await changedSince(root, baseline);
-  const stat = await diffStat(root);
   const logPath = await writeLog(root, args.agent, sessionId, { args, baseline, result });
 
   return {

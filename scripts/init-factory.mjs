@@ -71,6 +71,6 @@ execFileSync("npm", ["test"], { cwd: mcpDir, stdio: "inherit", shell: true });
 
 console.log("\n✅ Agent Factory successfully bootstrapped!");
 console.log(`\nTo start orchestrating in ${targetRoot}:`);
-console.log(`  1. Start server: opencode serve --port 4096 (in background or separate terminal)`);
+console.log(`  1. (auto) The delegation server starts the opencode engine on first dispatch — no manual step`);
 console.log(`  2. In ${targetRoot}, run: opencode`);
 console.log(`  3. Ask Orchestrator: "Create a simple app with .NET backend and Next.js frontend"\n`);
