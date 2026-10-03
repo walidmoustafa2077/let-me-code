@@ -8,8 +8,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer as createMcpServer } from "../src/index.ts";
 
-const ORDER = ["server_up", "version", "agent_roster", "serverUrl", "allowedAgents"];
-const ORDER_NO_VERSION = ["server_up", "agent_roster", "serverUrl", "allowedAgents"];
+const DIAG = ["host", "port", "port_open", "engine_lock", "lock_alive", "auto_start"];
+const ORDER = ["server_up", "version", "agent_roster", "serverUrl", "allowedAgents", ...DIAG];
+const ORDER_NO_VERSION = ["server_up", "agent_roster", "serverUrl", "allowedAgents", ...DIAG];
 
 type ToolText = { content: Array<{ type: string; text: string }>; isError?: boolean };
 
@@ -78,12 +79,12 @@ function textOf(r: ToolText): string {
 }
 
 // 1. Compact success: one line, no newline, order-sensitive exact keys.
-test("compact success: single line, no CR/LF, exact ordered five keys", async () => {
+test("compact success: single line, no CR/LF, exact ordered keys", async () => {
   await withEngine({}, async ({ client }) => {
     const text = textOf(await status(client, { json: true }));
     assert.equal(/[\r\n]/.test(text), false, `compact text must not contain CR/LF: ${JSON.stringify(text)}`);
     const parsed = JSON.parse(text);
-    assert.deepEqual(Object.keys(parsed), ORDER, "own-key order must be the normative five-key order");
+    assert.deepEqual(Object.keys(parsed), ORDER, "own-key order must be the normative order");
   });
 });
 
@@ -101,7 +102,7 @@ test("compact values reflect stub health + agents and configured url/allowlist",
 });
 
 // 3. Empty-arguments default = pretty two-space, same ordered keys.
-test("empty-arguments default: 2-space indented with same ordered five keys", async () => {
+test("empty-arguments default: 2-space indented with same ordered keys", async () => {
   await withEngine({}, async ({ client }) => {
     const text = textOf(await status(client, {}));
     assert.ok(text.includes("\n  "), "default output must be 2-space indented");
@@ -171,7 +172,7 @@ test("error path: both modes, three ordered keys, no throw, isError !== true", a
     for (const [label, r] of [["{}", empty], ["{json:true}", compact]] as const) {
       const text = textOf(r);
       const parsed = JSON.parse(text);
-      assert.deepEqual(Object.keys(parsed), ["server_up", "error", "serverUrl"], `${label} error key order`);
+      assert.deepEqual(Object.keys(parsed), ["server_up", "error", "serverUrl", ...DIAG], `${label} error key order`);
       assert.equal(parsed.server_up, false, `${label} server_up false`);
       assert.equal(typeof parsed.error, "string");
       assert.equal(r.isError !== true, true, `${label} isError must not be true`);
