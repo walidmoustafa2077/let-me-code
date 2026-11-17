@@ -1,0 +1,466 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "shell": "powershell",
+  "mcp": {
+    "delegation": {
+      "type": "local",
+      "command": [
+        "node",
+        "mcp/delegation/src/index.ts"
+      ],
+      "cwd": ".",
+      "enabled": true,
+      "timeout": 2400000
+    }
+  },
+  "agent": {
+    "general": {
+      "permission": {
+        "ctx_*": "deny"
+      }
+    },
+    "orchestrator": {
+      "mode": "primary",
+      "description": "The factory manager. Sole entry point; sole writer of BOARD.md; dispatches all other agents.",
+      "permission": {
+        "edit": {
+          "BOARD.md": "allow",
+          "INTENT.md": "allow",
+          "QUESTIONS_FOR_CLIENT.md": "allow",
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "delegation_*": "allow",
+        "skill": {
+          "*": "deny",
+          "agent-dispatcher": "allow",
+          "async-unblocker": "allow",
+          "brainstorming": "allow",
+          "configure-delegation": "allow",
+          "context-engineering": "allow",
+          "core-router": "allow",
+          "dispatching-parallel-agents": "allow",
+          "domain-modeling": "allow",
+          "emergency-halt": "allow",
+          "intent-extractor": "allow",
+          "meta-debugger": "allow",
+          "state-manager": "allow",
+          "strategic-compact": "allow",
+          "subagent-driven-development": "allow",
+          "using-superpowers": "allow",
+          "verification": "allow",
+          "verification-before-completion": "allow",
+          "writing-plans": "allow",
+          "finishing-a-development-branch": "allow"
+        }
+      }
+    },
+    "architect": {
+      "mode": "subagent",
+      "description": "Turns INTENT into a spec, CONSTRAINTS.md, and gated tickets. Writes no production code.",
+      "permission": {
+        "edit": {
+          "docs/specs/**": "allow",
+          "CONSTRAINTS.md": "allow",
+          "tickets/**": "allow",
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "delegation_ticket_write": "allow",
+        "skill": {
+          "*": "deny",
+          "aspnet-core": "allow",
+          "brainstorming": "allow",
+          "constraint-setter": "allow",
+          "context-engineering": "allow",
+          "design-language": "allow",
+          "domain-modeling": "allow",
+          "dotnet-webapi": "allow",
+          "frontend-design": "allow",
+          "security-threat-model": "allow",
+          "spec-creator": "allow",
+          "system-designer": "allow",
+          "task-breakdown": "allow",
+          "writing-plans": "allow"
+        }
+      }
+    },
+    "senior-dev": {
+      "mode": "subagent",
+      "description": "Implements tickets in thin verifiable slices; decomposes tickets and delegates mechanical boilerplate to junior-dev; leaves the tree dirty for review (never commits).",
+      "permission": {
+        "edit": {
+          "src/**": "allow",
+          "tests/**": "allow",
+          "backend/**": "allow",
+          "frontend/**": "allow",
+          "*": "allow"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "allow",
+        "delegation_*": "allow",
+        "skill": {
+          "*": "deny",
+          "apply-design": "allow",
+          "aspnet-core": "allow",
+          "avoid-ai-design": "allow",
+          "code-simplifier": "allow",
+          "composition-patterns": "allow",
+          "configuring-opentelemetry-dotnet": "allow",
+          "core-implementer": "allow",
+          "create-datadriven-aspnetcore": "allow",
+          "debugging-and-error-recovery": "allow",
+          "delegate-task": "allow",
+          "design-language": "allow",
+          "design-review": "allow",
+          "dotnet-webapi": "allow",
+          "e2e-and-browser-testing": "allow",
+          "executing-plans": "allow",
+          "find-bugs": "allow",
+          "frontend-design": "allow",
+          "incremental-implementation": "allow",
+          "mentorship": "allow",
+          "nexabasis-architecture": "allow",
+          "nexabasis-billing": "allow",
+          "nexabasis-openxml": "allow",
+          "nexabasis-parallel-workflow": "allow",
+          "nexabasis-sso-identity": "allow",
+          "next-cache-components-optimizer": "allow",
+          "next-dev-loop": "allow",
+          "optimizing-ef-core-queries": "allow",
+          "performance": "allow",
+          "react-best-practices": "allow",
+          "receiving-code-review": "allow",
+          "refactoring-and-simplification": "allow",
+          "requesting-code-review": "allow",
+          "security-best-practices": "allow",
+          "security-review": "allow",
+          "source-grounding": "allow",
+          "systematic-debugging": "allow",
+          "test-driven-development": "allow",
+          "ui-engineer": "allow",
+          "using-git-worktrees": "allow",
+          "verification-before-completion": "allow",
+          "mcp-builder": "allow",
+          "design-taste-frontend": "allow"
+        }
+      }
+    },
+    "junior-dev": {
+      "mode": "subagent",
+      "description": "Leaf implementation worker for scoped, well-scaffolded boilerplate and helpers. Never commits.",
+      "permission": {
+        "edit": {
+          "src/**": "allow",
+          "tests/**": "allow",
+          "backend/**": "allow",
+          "frontend/**": "allow",
+          "*": "allow"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "apply-design": "allow",
+          "core-implementer": "allow",
+          "design-language": "allow",
+          "incremental-implementation": "allow",
+          "source-grounding": "allow",
+          "test-driven-development": "allow",
+          "ui-engineer": "allow"
+        }
+      }
+    },
+    "qa-engineer": {
+      "mode": "subagent",
+      "description": "Combined quality gate: reviews the uncommitted diff against the spec, writes and runs tests, scans for security issues. Never commits.",
+      "permission": {
+        "edit": {
+          "tests/**": "allow",
+          "backend/**": "allow",
+          "frontend/**": "allow",
+          "*": "allow"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "deny",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "aspnet-core": "allow",
+          "avoid-ai-design": "allow",
+          "code-review-and-quality": "allow",
+          "code-simplifier": "allow",
+          "design-review": "allow",
+          "dotnet-webapi": "allow",
+          "e2e-and-browser-testing": "allow",
+          "find-bugs": "allow",
+          "react-best-practices": "allow",
+          "requesting-code-review": "allow",
+          "review-protocol": "allow",
+          "root-cause-debugging": "allow",
+          "security-best-practices": "allow",
+          "security-hardening": "allow",
+          "security-review": "allow",
+          "systematic-debugging": "allow",
+          "test-driven-development": "allow",
+          "verification": "allow",
+          "verification-before-completion": "allow",
+          "security-ownership-map": "allow",
+          "design-taste-frontend": "allow"
+        }
+      }
+    },
+    "git-agent": {
+      "mode": "subagent",
+      "description": "The only git writer. Stages and commits verified work only; never commits unverified changes; never pushes.",
+      "permission": {
+        "edit": {
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "deny",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "branch-hygiene": "allow",
+          "commit-conventions": "allow",
+          "git-workflow": "allow",
+          "git-rewrite-history": "allow"
+        }
+      }
+    },
+    "challenger": {
+      "mode": "subagent",
+      "description": "Adversarial plan reviewer. Stress-tests the spec, constraints, and tickets before any code is written.",
+      "permission": {
+        "edit": {
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "domain-modeling": "allow",
+          "doubt-driven-review": "allow",
+          "guardrail-audit": "allow",
+          "minimalism-enforcer": "allow",
+          "security-threat-model": "allow",
+          "writing-plans": "allow"
+        }
+      }
+    },
+    "minimalism-enforcer": {
+      "mode": "subagent",
+      "description": "Auditor that flags over-engineering and demands the simplest stdlib-first solution.",
+      "permission": {
+        "edit": {
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "deny",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "code-simplifier": "allow",
+          "minimalism-enforcer": "allow",
+          "refactoring-and-simplification": "allow"
+        }
+      }
+    },
+    "tech-writer": {
+      "mode": "subagent",
+      "description": "Documentation and retrospective writer. Produces docs/ADRs and improves the factory after a feature lands.",
+      "permission": {
+        "edit": {
+          "docs/**": "allow",
+          "README.md": "allow",
+          "CONSTRAINTS.md": "allow",
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny",
+          "rm -rf*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "ctx_*": "deny",
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "skill": {
+          "*": "deny",
+          "agent-skill-author": "allow",
+          "domain-modeling": "allow",
+          "session-retro": "allow",
+          "skill-creator": "allow",
+          "strategic-compact": "allow",
+          "system-documenter": "allow",
+          "writing-skills": "allow"
+        }
+      }
+    },
+    "devobs": {
+      "mode": "subagent",
+      "description": "DevOps & Production Readiness Specialist: audits Docker, CI/CD pipelines, container configs, and deployment scripts.",
+      "permission": {
+        "edit": {
+          "deploy/**": "allow",
+          ".github/**": "allow",
+          "docker/**": "allow",
+          "Dockerfile*": "allow",
+          "compose*.yml": "allow",
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "ctx_*": "deny",
+        "skill": {
+          "*": "deny",
+          "configuring-opentelemetry-dotnet": "allow",
+          "security-hardening": "allow",
+          "security-threat-model": "allow",
+          "systematic-debugging": "allow",
+          "verification": "allow"
+        }
+      }
+    },
+    "visualizer": {
+      "mode": "subagent",
+      "description": "UI/UX Prototyping Specialist: fast mockups, visual previews, and accessible UI component templates.",
+      "permission": {
+        "edit": {
+          "prototypes/**": "allow",
+          "mockups/**": "allow",
+          "docs/visual/**": "allow",
+          "*": "deny"
+        },
+        "bash": {
+          "*": "allow",
+          "git add*": "deny",
+          "git commit*": "deny",
+          "git push*": "deny",
+          "git reset*--hard*": "deny"
+        },
+        "task": {
+          "*": "deny"
+        },
+        "webfetch": "allow",
+        "delegation_*": "deny",
+        "ctx_*": "deny",
+        "skill": {
+          "*": "deny",
+          "apply-design": "allow",
+          "avoid-ai-design": "allow",
+          "composition-patterns": "allow",
+          "design-language": "allow",
+          "design-review": "allow",
+          "frontend-design": "allow",
+          "portfolio-case-study-writer": "allow",
+          "portfolio-page": "allow",
+          "react-best-practices": "allow",
+          "ui-engineer": "allow",
+          "design-taste-frontend": "allow"
+        }
+      }
+    }
+  }
+}
