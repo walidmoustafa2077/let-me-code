@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Vendor scrap yard (102 conflicting skills) - never enter history
+vendor/
+
+# Delegation engine runtime artifacts
+.delegation/logs/
+.delegation/runs/
+.delegation/snapshots/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Local env / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Taste-skill checker artifacts (screenshots, gate state)
+.taste-skill/
+shots/
+site/.taste-skill/
