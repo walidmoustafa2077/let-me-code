@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" data-type="software">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="page-type" content="software">
+<meta name="site-kind" content="software">
+<title>let-me-code — an agent factory for opencode</title>
+<meta name="description" content="let-me-code bootstraps a full AI coding agent factory into any project: 11 specialised subagents, 40 workflow skills, and a delegation MCP server that orchestrates them. One command, Node 22+, MIT.">
+<link rel="canonical" href="https://walidmoustafa2077.github.io/let-me-code/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="let-me-code — an agent factory for opencode">
+<meta property="og:description" content="11 specialised subagents, 40 workflow skills, and a delegation MCP server. Bootstrap an AI coding agent factory into any project with one command.">
+<meta property="og:url" content="https://walidmoustafa2077.github.io/let-me-code/">
+<meta property="og:site_name" content="let-me-code">
+<meta property="og:image" content="https://walidmoustafa2077.github.io/let-me-code/share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="let-me-code — an agent factory for opencode">
+<meta name="twitter:description" content="11 specialised subagents, 40 workflow skills, and a delegation MCP server. Bootstrap an AI coding agent factory into any project with one command.">
+<meta name="theme-color" content="#f7f6f2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314140f'/%3E%3Crect x='7' y='7' width='18' height='3' fill='%235c8bff'/%3E%3Crect x='7' y='14' width='12' height='3' fill='%23f7f6f2'/%3E%3Crect x='7' y='21' width='18' height='3' fill='%23f7f6f2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "let-me-code",
+  "alternateName": "agent factory for opencode",
+  "description": "An agent factory for opencode: specialized subagents, a workflow skill library, and a delegation MCP server that orchestrates them.",
+  "codeRepository": "https://github.com/walidmoustafa2077/let-me-code",
+  "programmingLanguage": ["TypeScript", "JavaScript"],
+  "runtimePlatform": "Node.js >= 22.18",
+  "license": "https://opensource.org/licenses/MIT",
+  "version": "1.0.0",
+  "keywords": "opencode, ai agents, subagents, mcp server, agent orchestration, ai coding assistant, model context protocol"
+}
+</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="mark" href="#top">let-me-code</a>
+  <nav aria-label="Sections">
+    <a href="#how">How it works</a>
+    <a href="#roster">Roster</a>
+    <a href="#start">Install</a>
+    <a class="gh" href="https://github.com/walidmoustafa2077/let-me-code" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section class="hero" id="top">
+    <div class="hero-copy" data-enter>
+      <p class="eyebrow">Agent factory for opencode</p>
+      <h1>A coding agent that hands the work to specialists.</h1>
+      <p class="lede">
+        One command installs eleven subagents, forty workflow skills, and a delegation
+        MCP server into your repository. The orchestrator writes the tickets, scopes each
+        hand-off, and reads back the diff, so planning, implementation, review and
+        commit are different agents with different permissions.
+      </p>
+      <div class="actions">
+        <a class="btn" href="#start">Bootstrap your repo</a>
+        <a class="btn ghost" href="https://github.com/walidmoustafa2077/let-me-code" rel="noopener">Read the source</a>
+      </div>
+    </div>
+
+    <figure class="terminal" data-enter aria-label="Terminal session bootstrapping the factory">
+      <div class="term-bar">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="term-title">~/your-project</span>
+      </div>
+<pre><code><span class="p">$</span> npx github:walidmoustafa2077/let-me-code
+<span class="ok">&#10003;</span> agents      11 written to .opencode/agent
+<span class="ok">&#10003;</span> skills      40 installed to .opencode/skills
+<span class="ok">&#10003;</span> mcp         delegation server linked
+<span class="ok">&#10003;</span> tests       114 passing
+
+<span class="p">$</span> opencode
+<span class="c">orchestrator</span> reading request…
+<span class="c">orchestrator</span> <span class="ok">&#8594;</span> architect   spec + tickets
+<span class="c">architect</span>   <span class="ok">&#8594;</span> senior-dev  ticket 1 of 4
+<span class="c">senior-dev</span>   3 files changed <span class="dim">+142 &#8722;31</span>
+<span class="c">orchestrator</span> <span class="ok">&#8594;</span> qa-engineer diff vs spec
+<span class="c">qa-engineer</span>  114 pass, 0 fail
+<span class="c">orchestrator</span> <span class="ok">&#8594;</span> git-agent   commit
+<span class="ok">&#10003;</span> landed on main — review kept</code></pre>
+    </figure>
+  </section>
+
+  <section id="how" class="section">
+    <div class="wrap split">
+      <div class="label">
+        <h2>How it works</h2>
+        <p class="kicker">One session owns the conversation. The work moves out of it.</p>
+      </div>
+      <div class="body">
+        <p class="lead">
+          When a request needs real work, the orchestrator writes a ticket, hands it to a
+          scoped child agent, and reads back only the diff and the hand-off — never another
+          agent's whole transcript. Code, review and commit stay separate, so a reviewer can
+          reject what an implementer produced.
+        </p>
+        <ol class="flow">
+          <li><span class="k">Route</span><span>Classify the request as a spike, a bounded ticket, or architecture, then pick the workflow.</span></li>
+          <li><span class="k">Specify</span><span>Architect turns intent into a spec and constraints; tickets are sliced until each is independently testable.</span></li>
+          <li><span class="k">Implement</span><span>Senior-dev builds a thin verifiable slice, leaving the tree dirty for review.</span></li>
+          <li><span class="k">Review</span><span>QA runs the suite against the spec, scans for security issues, and flags over-engineering.</span></li>
+          <li><span class="k">Land</span><span>Git-agent commits only what passed, with your review checkpoint in between.</span></li>
+        </ol>
+        <p class="aside">
+          The delegation server speaks to a warm <code>opencode serve</code> instance, detects
+          v1 or v2, and resolves a model per agent with fallbacks — a stale provider name
+          degrades the job instead of failing it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="moment" aria-label="What the factory changes">
+    <p class="statement">
+      One model talks.<br><em>Eleven do the work.</em>
+    </p>
+    <p class="statement-note">
+      A single agent that plans, writes, reviews and commits is one opinion with write access.
+      Splitting the roles costs a little coordination and buys a review you can actually trust.
+    </p>
+  </section>
+
+  <section id="roster" class="section">
+    <div class="wrap">
+      <div class="head">
+        <h2>The roster</h2>
+        <p class="kicker">Eleven agents, each with a narrow job and its own permissions.</p>
+      </div>
+      <ul class="roster">
+        <li><span class="agent">orchestrator</span><span class="role">Owns the plan, delegates, reconciles the board.</span></li>
+        <li><span class="agent">architect</span><span class="role">Turns intent into a spec, constraints, and gated tickets.</span></li>
+        <li><span class="agent">challenger</span><span class="role">Attacks the plan before any code is written.</span></li>
+        <li><span class="agent">senior-dev</span><span class="role">Implements tickets in thin, verifiable slices.</span></li>
+        <li><span class="agent">junior-dev</span><span class="role">Scoped boilerplate and helpers under supervision.</span></li>
+        <li><span class="agent">qa-engineer</span><span class="role">Tests the diff against the spec; scans for security issues.</span></li>
+        <li><span class="agent">git-agent</span><span class="role">The only writer to git; commits verified work, never pushes.</span></li>
+        <li><span class="agent">tech-writer</span><span class="role">Docs, ADRs, and retrospectives after a feature lands.</span></li>
+        <li><span class="agent">minimalism-enforcer</span><span class="role">Flags over-engineering and demands the simplest version.</span></li>
+        <li><span class="agent">devobs</span><span class="role">Audits Docker, CI pipelines, and deployment config.</span></li>
+        <li><span class="agent">visualizer</span><span class="role">Fast UI mockups and accessible component templates.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="start" class="section">
+    <div class="wrap split">
+      <div class="label">
+        <h2>Install</h2>
+        <p class="kicker">Node 22.18+, opencode installed, an empty afternoon.</p>
+      </div>
+      <div class="body">
+        <p class="lead">
+          Run it inside the project you want the factory in. Existing files are backed up and
+          never clobbered; the MCP dependency install and its test run are part of the bootstrap.
+        </p>
+        <pre class="cmd"><span class="p">$</span> npx github:walidmoustafa2077/let-me-code
+
+<span class="dim"># then, in that project</span>
+<span class="p">$</span> opencode serve --port 4096   <span class="dim"># terminal one</span>
+<span class="p">$</span> opencode                     <span class="dim"># terminal two</span></pre>
+        <p class="flags">
+          <span>Flags</span>
+          <code>--yes</code><code>--force</code><code>--no-install</code><code>--no-test</code><code>--no-git</code><code>--model &lt;id&gt;</code>
+        </p>
+        <p class="aside">
+          The bootstrap installs the <code>let-me-code</code> command; run it again later to
+          upgrade the factory in place.
+        </p>
+        <p class="aside">
+          On opencode v2 export <code>OPENCODE_SERVER_PASSWORD</code> before starting the server
+          and the client; the two sides negotiate auth on their own.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="support" class="support">
+    <div class="wrap split">
+      <div class="label">
+        <h2>Support</h2>
+        <p class="kicker">Free to use. MIT licensed. No key, no account.</p>
+      </div>
+      <div class="body">
+        <div class="tip">
+          <p class="tip-mark">$ tip &mdash; optional</p>
+          <p class="tip-copy">
+            If the factory earns you back an afternoon, you can send a coffee
+            the other way.
+          </p>
+          <p class="tip-actions">
+            <a class="btn" href="https://paypal.me/walidmoustafa2077" rel="noopener">Buy me a coffee <span aria-hidden="true">&#8599;</span></a>
+            <span class="tip-note">PayPal &middot; any amount</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap split">
+      <div class="label">
+        <h2>Read the code</h2>
+      </div>
+      <div class="body">
+        <p>
+          Documentation, the model configuration format, and skill provenance live in the
+          repository: <a href="https://github.com/walidmoustafa2077/let-me-code">github.com/walidmoustafa2077/let-me-code</a>.
+        </p>
+        <p class="note">Built on <a href="https://opencode.ai" rel="noopener">opencode</a> and the <a href="https://github.com/modelcontextprotocol" rel="noopener">Model Context Protocol</a>. MIT licensed.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>let-me-code v1.0.0</span>
+    <span class="foot-links">
+      <a href="https://github.com/walidmoustafa2077/let-me-code/blob/main/LICENSE" rel="noopener">MIT</a>
+      <a href="https://paypal.me/walidmoustafa2077" rel="noopener">Support</a>
+      <a href="#main">Top</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
