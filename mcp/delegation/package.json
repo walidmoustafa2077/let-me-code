@@ -1,0 +1,18 @@
+{
+  "name": "@let-me-code/delegation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "^4.6.7"
+  },
+  "license": "MIT"
+}
